@@ -1,0 +1,7 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=1899
+
+Somewhat similar to locate on Unix, FindFile allows you open a file quickly by typing in its file name.  You can use :FC to generate the cache of all files in a directory recursively, then using :FF will open a buffer that can autocomplete on the filenames that are cached.  Pressing <Enter> will open the file.  
+
+This is a pure vim implementation and the cache is stored in memory using a vim dictionary.  It should work on both Windows and Unix.
+
+See http://wlee.net/FindFile.swf.html for details.
