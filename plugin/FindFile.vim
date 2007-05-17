@@ -65,6 +65,9 @@ command! FCC call <SID>CacheClear()
 command! FindFile call <SID>FindFile()
 command! FF call <SID>FindFile()
 
+command! FindFileSplit call <SID>FindFileSplit()
+command! FS call <SID>FindFileSplit()
+
 " Global Settings {{{1
 if !exists("g:FindFileIgnore")
     let g:FindFileIgnore = ['*.o', '*.pyc', '*/tmp/*']
@@ -95,6 +98,18 @@ fun! CompleteFile(findstart, base)
 	endif
 endfun
 
+fun! <SID>MayComplete(c)
+    if pumvisible()
+        return a:c
+    else
+	    return "" . a:c . "\<C-X>\<C-O>"
+    endif
+endfun
+
+fun! <SID>FindFileSplit()
+    split
+    call <SID>FindFile()
+endfun
 
 fun! <SID>FindFile()
 	new FindFile
@@ -136,12 +151,14 @@ fun! <SID>FindFile()
 				\'_',
 				\]
 	for k in compKeys
-		let remapCmd = "inoremap <buffer> " . k . " " . k . "<C-X><C-O>"
+		"let remapCmd = "inoremap <buffer> " . k . " " . k . "<C-X><C-O>"
+		let remapCmd = "inoremap <expr> <buffer> " . k . " <SID>MayComplete('" . k . "')"
 		exe remapCmd
 	endfor
 
 	inoremap <buffer> <CR> <ESC>:silent call <SID>EditFile(getline("."))<CR>
 	inoremap <buffer> <ESC> <C-[>:silent call <SID>QuitBuff()<CR>
+	nnoremap <buffer> <ESC> :silent call <SID>QuitBuff()<CR>
 	setlocal completeopt=menuone,longest,preview
 	setlocal omnifunc=CompleteFile
 	setlocal noignorecase
