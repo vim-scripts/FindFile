@@ -84,7 +84,7 @@ fun! CompleteFile(findstart, base)
 		return 0
 	else
 		" TODO: We can definitely do a binary search on the keys instead of
-		" doing a learn match.
+		" doing a linear match.
 		for k in s:fileKeys
 			let matchExpr = <SID>EscapeChars(a:base)
 			if match(k, matchExpr) == 0
@@ -116,45 +116,15 @@ fun! <SID>FindFile()
 	setlocal buftype=nofile
 	setlocal bufhidden=hide
 	setlocal noswapfile
-	" Map the keys for completion
-	" TODO: Need to add complete list of completion keys
-	let compKeys = [
-				\'a','A',
-				\'b','B',
-				\'c','C',
-				\'c','C',
-				\'d','D',
-				\'e','E',
-				\'f','F',
-				\'g','G',
-				\'h','H',
-				\'i','I',
-				\'j','J',
-				\'k','K',
-				\'l','L',
-				\'m','M',
-				\'n','N',
-				\'o','O',
-				\'p','P',
-				\'q','Q',
-				\'r','R',
-				\'s','S',
-				\'t','T',
-				\'u','U',
-				\'v','V',
-				\'w','W',
-				\'x','X',
-				\'y','Y',
-				\'z','Z',
-				\'.',
-				\',',
-				\'_',
-				\]
-	for k in compKeys
-		"let remapCmd = "inoremap <buffer> " . k . " " . k . "<C-X><C-O>"
-		let remapCmd = "inoremap <expr> <buffer> " . k . " <SID>MayComplete('" . k . "')"
+	" Map the keys for completion:
+	" We are remapping keys from ascii 33 (!) to 126 (~)
+	let k = 33
+	while (k < 127)
+		let c = escape(nr2char(k), "\\'|")
+		let remapCmd = "inoremap <expr> <buffer> " . c . " <SID>MayComplete('" . c . "')"
 		exe remapCmd
-	endfor
+		let k = k + 1
+	endwhile
 
 	inoremap <buffer> <CR> <ESC>:silent call <SID>EditFile(getline("."))<CR>
 	inoremap <buffer> <ESC> <C-[>:silent call <SID>QuitBuff()<CR>
@@ -168,6 +138,7 @@ endfun
 fun! <SID>CacheClear()
 	let s:fileCache = {}
 	let s:fileKeys = []
+	echo "FindFile cache cleared."
 endfun
 
 fun! <SID>EscapeChars(toEscape)
@@ -175,6 +146,7 @@ fun! <SID>EscapeChars(toEscape)
 endfun
 
 fun! <SID>CacheDir(...)
+	echo "Finding files to cache..."
 	for d in a:000
 		"Creates the dictionary that will parse all files recursively
 		for i in g:FindFileIgnore
