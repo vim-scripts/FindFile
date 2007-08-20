@@ -162,23 +162,26 @@ fun! <SID>CacheDir(...)
 		for f in split(files, "\n")
 			let fname = fnamemodify(f, ":t")
 			let fpath = fnamemodify(f, ":p")
-			" If the cache already has this entry, we'll just skip it
-			let hasEntry = 0
-			while has_key(s:fileCache, fname)
-				if s:fileCache[fname] == fpath
-					let hasEntry = 1
-					break
+			" We only glob the files, not directory
+			if !isdirectory(fpath)
+				" If the cache already has this entry, we'll just skip it
+				let hasEntry = 0
+				while has_key(s:fileCache, fname)
+					if s:fileCache[fname] == fpath
+						let hasEntry = 1
+						break
+					endif
+					let fnameArr = split(fname, ":")
+					if len(fnameArr) > 1
+						let fname = fnameArr[0] . ":" . (fnameArr[1] + 1)
+					else
+						let fname = fname . ":1"
+					endif
+				endwhile
+				if !hasEntry
+					let s:fileCache[fname] = fpath
+					let ctr = ctr + 1
 				endif
-				let fnameArr = split(fname, ":")
-				if len(fnameArr) > 1
-					let fname = fnameArr[0] . ":" . (fnameArr[1] + 1)
-				else
-					let fname = fname . ":1"
-				endif
-			endwhile
-			if !hasEntry
-				let s:fileCache[fname] = fpath
-				let ctr = ctr + 1
 			endif
 		endfor
 		let s:fileKeys = sort(copy(keys(s:fileCache)))
